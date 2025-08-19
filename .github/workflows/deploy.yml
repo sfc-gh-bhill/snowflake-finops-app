@@ -23,38 +23,37 @@ jobs:
       run: |
         pip install snowflake-cli-labs
         
-    - name: Configure Snowflake Connection
-      env:
-        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
-        SNOWFLAKE_USER: ${{ secrets.SNOW_USER }}
-        SNOWFLAKE_PASSWORD: ${{ secrets.SNOW_PW }}
-        SNOWFLAKE_ROLE: ${{ secrets.SNOW_ROLE }}
-        SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
-        SNOWFLAKE_DATABASE: ${{ secrets.SNOW_DATABASE }}
-        SNOWFLAKE_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
-      run: |
-        snow connection add default \
-          --account "$SNOWFLAKE_ACCOUNT" \
-          --user "$SNOWFLAKE_USER" \
-          --role "$SNOWFLAKE_ROLE" \
-          --warehouse "$SNOWFLAKE_WAREHOUSE" \
-          --database "$SNOWFLAKE_DATABASE" \
-          --schema "$SNOWFLAKE_SCHEMA"
-          
     - name: Deploy SQL Objects
       env:
-        SNOWFLAKE_PASSWORD: ${{ secrets.SNOW_PW }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOW_USER }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOW_PW }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_ROLE: ${{ secrets.SNOW_ROLE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: ${{ secrets.SNOW_DATABASE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
       run: |
+        echo "Deploying SQL objects..."
         for sql_file in sql/*.sql; do
-          echo "Executing $sql_file"
-          snow sql -f "$sql_file"
+          if [ -f "$sql_file" ]; then
+            echo "Executing $sql_file"
+            snow sql -f "$sql_file" --connection default
+          fi
         done
         
     - name: Deploy Streamlit App
       env:
-        SNOWFLAKE_PASSWORD: ${{ secrets.SNOW_PW }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOW_USER }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOW_PW }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_ROLE: ${{ secrets.SNOW_ROLE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: ${{ secrets.SNOW_DATABASE }}
+        SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
       run: |
+        echo "Deploying Streamlit app..."
         snow streamlit deploy \
           --replace \
           --name finops-app \
-          --file app/streamlit_app.py
+          --file app/streamlit_app.py \
+          --connection default
