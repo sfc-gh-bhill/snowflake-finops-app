@@ -1,0 +1,49 @@
+name: Deploy Snowflake FinOps App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Snowflake CLI
+      run: |
+        pip install snowflake-cli-labs
+        
+    - name: Configure Snowflake Connection
+      run: |
+        snow connection add default \
+          --account ${{ secrets.SNOW_ACCOUNT }} \
+          --user ${{ secrets.SNOW_USER }} \
+          --password ${{ secrets.SNOW_PW }} \
+          --role ${{ secrets.SNOW_ROLE }} \
+          --warehouse ${{ secrets.SNOW_WAREHOUSE }} \
+          --database ${{ secrets.SNOW_DATABASE }} \
+          --schema ${{ secrets.SNOW_SCHEMA }}
+          
+    - name: Deploy SQL Objects
+      run: |
+        for sql_file in sql/*.sql; do
+          echo "Executing $sql_file"
+          snow sql -f "$sql_file"
+        done
+        
+    - name: Deploy Streamlit App
+      run: |
+        snow streamlit deploy \
+          --replace \
+          --name finops-app \
+          --file app/streamlit_app.py
