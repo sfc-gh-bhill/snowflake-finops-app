@@ -23,7 +23,7 @@ jobs:
       run: |
         pip install snowflake-cli-labs
         
-    - name: Deploy SQL Objects
+    - name: Deploy Project
       env:
         SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
         SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOW_USER }}
@@ -37,23 +37,12 @@ jobs:
         for sql_file in sql/*.sql; do
           if [ -f "$sql_file" ]; then
             echo "Executing $sql_file"
-            snow sql -f "$sql_file" --connection default
+            snow sql -f "$sql_file" --connection default --database "$SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE" --schema "$SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA"
           fi
         done
         
-    - name: Deploy Streamlit App
-      env:
-        SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT: ${{ secrets.SNOW_ACCOUNT }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_USER: ${{ secrets.SNOW_USER }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD: ${{ secrets.SNOW_PW }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_ROLE: ${{ secrets.SNOW_ROLE }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: ${{ secrets.SNOW_WAREHOUSE }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE: ${{ secrets.SNOW_DATABASE }}
-        SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA: ${{ secrets.SNOW_SCHEMA }}
-      run: |
         echo "Deploying Streamlit app..."
         snow streamlit deploy \
           --replace \
-          --name finops-app \
-          --file app/streamlit_app.py \
-          --connection default
+          --connection default \
+          finops-app
