@@ -13,7 +13,7 @@ sql:
 streamlit:
   - name: finops-app
     stage: finops_stage
-    query_warehouse: compute_wh
+    query_warehouse: "{{ env.SNOWFLAKE_WAREHOUSE }}"
     main_file: app/streamlit_app.py
     pages_dir: app/pages/
     additional_source_files:
@@ -25,10 +25,11 @@ streamlit:
 # Environment configuration
 environments:
   prod:
-    account: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT }}"
-    user: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_USER }}"
-    password: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD }}"
-    role: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_ROLE }}"
-    warehouse: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE }}"
-    database: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE }}"
-    schema: "{{ env.SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA }}"
+    account: "{{ env.SNOWFLAKE_ACCOUNT }}"
+    user: "{{ env.SNOWFLAKE_USER }}"
+    private_key_path: "{{ env.SNOWFLAKE_PRIVATE_KEY_PATH }}"
+    private_key_passphrase: "{{ env.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}"
+    role: "{{ env.SNOWFLAKE_ROLE }}"
+    warehouse: "{{ env.SNOWFLAKE_WAREHOUSE }}"
+    database: "{{ env.SNOWFLAKE_DATABASE }}"
+    schema: "{{ env.SNOWFLAKE_SCHEMA }}"
